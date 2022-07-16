@@ -1,6 +1,6 @@
 import os
 from utils import build_query
-from flask import Flask, request
+from flask import Flask, request, Response
 from flask_restx import abort
 
 app = Flask(__name__)
@@ -11,13 +11,14 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 
 
 @app.route("/perform_query", methods=['POST', 'GET'])
-def perform_query():
+def perform_query() -> Response:
     # получить параметры query и file_name из request.args, при ошибке вернуть ошибку 400
     # проверить, что файла file_name существует в папке DATA_DIR, при ошибке вернуть ошибку 400
     # с помощью функционального программирования (функций filter, map), итераторов/генераторов сконструировать запрос
     # вернуть пользователю сформированный результат
 
     # http://127.0.0.1:5000/perform_query?cmd_1=filter&value_1=POST&cmd_2=limit&value_2=5&file_name=apache_logs.txt
+    # http://127.0.0.1:5000/perform_query?cmd_1=filter&value_1=images\/\w+\.png&cmd_2=limit&value_2=5&file_name=apache_logs.txt
     cmd_1 = request.args.get("cmd_1")
     value_1 = request.args.get("value_1")
     cmd_2 = request.args.get("cmd_2")
@@ -36,7 +37,7 @@ def perform_query():
 
     # Сортировка данных по запросу
     with open(file_path) as file:
-        res = build_query(cmd_1.lower(), value_1.lower(), file)
+        res = build_query(cmd_1, value_1, file)
         if cmd_2 and value_2:
             res = build_query(cmd_2.lower(), value_2.lower(), res)
         res = "\n".join(res)

@@ -1,4 +1,8 @@
-def build_query(cmd, value, file_list):
+import re
+from typing import Iterator, Union, Any, List
+
+
+def build_query(cmd: str, value: str, file_list: Iterator) -> list:
     """Сортировка данных в зависимости от запроса"""
     methods_list = ["filter", "map", "unique", "sorted", "limit"]
 
@@ -8,7 +12,7 @@ def build_query(cmd, value, file_list):
     else:
         if cmd == "filter":
             # res = [x for x in file_list if value in x]
-            res = filter(lambda x: value in x, file_list)
+            res = list(filter(lambda x: value in x, file_list))
             return res
 
         if cmd == "map":
@@ -24,7 +28,7 @@ def build_query(cmd, value, file_list):
 
         if cmd == "sorted":
             reverse = value = "desc"
-            res = sorted(file_list, reverse=reverse)
+            res = list(sorted(file_list, reverse=reverse))
             # print(res)
             return res
 
@@ -33,4 +37,8 @@ def build_query(cmd, value, file_list):
             res = list(file_list)[:value]
             return res
 
-
+        if cmd == "regex":
+            value = re.compile(cmd)
+            res = list(file_list)[:value]
+            return res
+        return []
