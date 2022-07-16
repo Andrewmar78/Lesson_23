@@ -1,10 +1,10 @@
 import re
-from typing import Iterator, Union, Any, List
+from typing import Iterator, Any
 
 
-def build_query(cmd: str, value: str, file_list: Iterator) -> list:
+def build_query(cmd: str, value: str, file_list: Iterator) -> list[Any]:
     """Сортировка данных в зависимости от запроса"""
-    methods_list = ["filter", "map", "unique", "sorted", "limit"]
+    methods_list = ["filter", "map", "unique", "sorted", "limit", "regex"]
 
     if cmd not in methods_list:
         raise TypeError("Параметры некорректны")
@@ -16,8 +16,7 @@ def build_query(cmd: str, value: str, file_list: Iterator) -> list:
             return res
 
         if cmd == "map":
-            value = int(value)
-            res = [x.split()[value] for x in file_list]
+            res = list([x.split()[int(value)] for x in file_list])
             print(res)
             return res
 
@@ -27,18 +26,21 @@ def build_query(cmd: str, value: str, file_list: Iterator) -> list:
             return res
 
         if cmd == "sorted":
-            reverse = value = "desc"
+            # Если значение value передано, то обратная сортировка, иначе прямая
+            if value == "desc":
+                reverse = True
+            else:
+                reverse = False
+            # reverse = value == "desc"
             res = list(sorted(file_list, reverse=reverse))
-            # print(res)
             return res
 
         if cmd == "limit":
-            value = int(value)
-            res = list(file_list)[:value]
+            res = list(file_list)[:int(value)]
             return res
 
         if cmd == "regex":
-            value = re.compile(cmd)
-            res = list(file_list)[:value]
+            regex = re.compile(value)
+            res = list(filter(lambda x: regex.search(x), file_list))
             return res
         return []

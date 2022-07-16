@@ -18,7 +18,7 @@ def perform_query() -> Response:
     # вернуть пользователю сформированный результат
 
     # http://127.0.0.1:5000/perform_query?cmd_1=filter&value_1=POST&cmd_2=limit&value_2=5&file_name=apache_logs.txt
-    # http://127.0.0.1:5000/perform_query?cmd_1=filter&value_1=images\/\w+\.png&cmd_2=limit&value_2=5&file_name=apache_logs.txt
+    # http://127.0.0.1:5000/perform_query?cmd_1=regex&value_1=\/images\/.{1,}\.png&file_name=apache_logs.txt
     cmd_1 = request.args.get("cmd_1")
     value_1 = request.args.get("value_1")
     cmd_2 = request.args.get("cmd_2")
@@ -29,7 +29,7 @@ def perform_query() -> Response:
     if not (cmd_1 and value_1 and file_name):
         abort(400, "Bad request")
 
-    file_path = os.path.join(DATA_DIR, file_name)
+    file_path = os.path.join(DATA_DIR, str(file_name))
 
     # Обработка ошибки отсутствия файла
     if not os.path.exists(file_path):
@@ -37,12 +37,10 @@ def perform_query() -> Response:
 
     # Сортировка данных по запросу
     with open(file_path) as file:
-        res = build_query(cmd_1, value_1, file)
+        res = build_query(str(cmd_1), str(value_1), file)
         if cmd_2 and value_2:
-            res = build_query(cmd_2.lower(), value_2.lower(), res)
-        res = "\n".join(res)
-
-    return app.response_class(res, content_type="text/plain")
+            res = build_query(str(cmd_2).lower(), str(value_2).lower(), iter(res))
+    return app.response_class("\n".join(res), content_type="text/plain")
 
 
 if __name__ == "__main__":
